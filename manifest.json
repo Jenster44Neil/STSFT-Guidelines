@@ -1,0 +1,26 @@
+{
+  "name": "STSFT Clinical Guidelines",
+  "short_name": "STSFT Guidelines",
+  "description": "Mobile-first clinical guidelines for South Tyneside and Sunderland NHS Foundation Trust",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#003087",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["medical", "productivity"]
+}

@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="STSFT Clinical Guidelines - Mobile-first clinical reference">
+    <meta name="theme-color" content="#003087">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="STSFT Guidelines">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <title>STSFT Clinical Guidelines</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+
+        :root {
+            --nhs-blue: #003087;
+            --nhs-blue-light: #0066cc;
+            --nhs-blue-dark: #002060;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-white: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-100%); opacity: 0; }
+        }
+
+        .screen.slide-in { animation: slideIn 0.3s ease-out; }
+        .screen.slide-out { animation: slideOut 0.3s ease-out; }
+
+        .header {
+            background: var(--nhs-blue);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .header-home {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .nhs-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nhs-lozenge {
+            background: white;
+            color: var(--nhs-blue);
+            padding: 0.25rem 0.5rem;
+            border-radius: 2px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            line-height: 1;
+        }
+
+        .trust-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0.95;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .back-button, .header-info {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .back-button { font-size: 1.5rem; }
+        .header-info { font-size: 1.25rem; }
+
+        .back-button:active, .header-info:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 1.125rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-container {
+            padding: 1rem;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--nhs-blue);
+            background: var(--bg-white);
+        }
+
+        .search-input::placeholder { color: var(--text-secondary); }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .home-content {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .home-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                padding: 0.75rem;
+            }
+        }
+
+        .category-card {
+            background: var(--nhs-blue);
+            color: white;
+            padding: 1.5rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            min-height: 140px;
+            box-shadow: var(--shadow);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .category-card:active {
+            background: var(--nhs-blue-dark);
+            transform: scale(0.98);
+        }
+
+        .category-emoji { font-size: 2.5rem; line-height: 1; }
+        .category-name { font-weight: 600; font-size: 1rem; line-height: 1.3; }
+        .category-count { font-size: 0.75rem; opacity: 0.9; font-weight: 500; }
+
+        .guideline-list {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .guideline-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            color: var(--nhs-blue);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 44px;
+            box-shadow: var(--shadow);
+        }
+
+        .guideline-card:active { background: #f3f4f6; }
+        .guideline-card-arrow { font-size: 1.25rem; margin-left: 0.5rem; opacity: 0.5; }
+
+        .guideline-content { padding: 1rem; }
+
+        .accordion-section {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .accordion-header {
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            transition: all 0.2s;
+            min-height: 44px;
+        }
+
+        .accordion-header:active { opacity: 0.8; }
+
+        .accordion-header-text {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .accordion-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .accordion-section.expanded .accordion-toggle { transform: rotate(180deg); }
+
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .accordion-section.expanded .accordion-body { max-height: none; }
+
+        .accordion-body-content {
+            padding: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .accordion-body-content p { margin-bottom: 1rem; }
+        .accordion-body-content p:last-child { margin-bottom: 0; }
+        .accordion-body-content h3 { font-size: 1.1rem; font-weight: 700; margin-top: 1.75rem; margin-bottom: 0.75rem; color: var(--nhs-blue); border-bottom: 2px solid #e5e7eb; padding-bottom: 0.4rem; }
+        .accordion-body-content h3:first-child { margin-top: 0.5rem; }
+        .accordion-body-content h4 { font-size: 1rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #374151; padding-left: 0.5rem; border-left: 3px solid var(--nhs-blue); }
+        .accordion-body-content ul { margin: 0.75rem 0; padding-left: 1.5rem; }
+        .accordion-body-content li { margin-bottom: 0.4rem; line-height: 1.6; }
+        .accordion-body-content li::marker { color: var(--nhs-blue); }
+        .accordion-body-content strong { font-weight: 600; color: #1e293b; }
+        .accordion-body-content a, .accordion-body-content .cross-link { color: var(--nhs-blue); text-decoration: underline; cursor: pointer; font-weight: 500; }
+        .accordion-body-content a:active, .accordion-body-content .cross-link:active { opacity: 0.7; background-color: #dbeafe; border-radius: 2px; }
+        .accordion-body-content .cross-link::after { content: ' →'; font-size: 0.85em; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-end;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(100%); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 12px 12px 0 0;
+            padding: 2rem 1rem 1rem;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metadata-item { margin-bottom: 1rem; }
+        .metadata-label { font-weight: 600; color: var(--text-secondary); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metadata-value { color: var(--text-primary); margin-top: 0.25rem; }
+
+        .search-results {
+            position: absolute;
+            top: calc(100% - 1rem);
+            left: 1rem;
+            right: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .search-results.active { display: block; }
+
+        .search-result-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:active { background: var(--bg-light); }
+        .search-result-guideline { font-weight: 600; color: var(--nhs-blue); margin-bottom: 0.25rem; }
+        .search-result-section { font-size: 0.875rem; color: var(--text-secondary); }
+
+        @media print {
+            .header, .search-container, .back-button, .header-info { display: none; }
+            .screen { height: auto; }
+            .screen.active { display: block; }
+            .accordion-section.expanded { page-break-inside: avoid; }
+            .accordion-body { max-height: none; }
+        }
+
+        @media (min-width: 600px) {
+            .home-content {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+            .category-card { min-height: 180px; }
+            .category-emoji { font-size: 3rem; }
+            .guideline-list { padding: 1.5rem; gap: 1rem; }
+            .guideline-content { padding: 1.5rem; }
+            .modal-content { max-width: 600px; border-radius: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="homeScreen" class="screen active">
+        <header class="header header-home">
+            <div class="nhs-logo">
+                <div class="nhs-lozenge">NHS</div>
+                <div class="trust-name">South Tyneside and Sunderland NHS Foundation Trust</div>
+            </div>
+        </header>
+        <div class="search-container">
+            <input type="text" id="searchInputHome" class="search-input" placeholder="Search all guidelines...">
+            <div class="search-results" id="searchResultsHome"></div>
+        </div>
+        <div class="content">
+            <div class="home-content" id="homeContent"></div>
+        </div>
+    </div>
+
+    <div id="categoryScreen" class="screen">
+        <header class="header">
+            <div class="header-nav">
+                <button class="back-button" onclick="app.goHome()">←</button>
+                <div class="header-title" id="categoryTitle"></div>
+            </div>
+        </header>
+        <div class="search-container">
+            <input type="text" id="searchInputCategory" class="search-input" placeholder="Search guidelines...">
+            <div class="search-results" id="searchResultsCategory"></div>
+        </div>
+        <div class="content">
+            <div class="guideline-list" id="guidelineList"></div>
+        </div>
+    </div>
+
+    <div id="guidelineScreen" class="screen">
+        <header class="header">
+            <div class="header-nav">
+                <button class="back-button" onclick="app.goBack()">←</button>
+                <div class="header-title" id="guidelineTitle"></div>
+                <button class="header-info" id="infoButton" onclick="app.showMetadata()">ⓘ</button>
+            </div>
+        </header>
+        <div class="search-container">
+            <input type="text" id="searchInputGuideline" class="search-input" placeholder="Search in guideline...">
+            <div class="search-results" id="searchResultsGuideline"></div>
+        </div>
+        <div class="content">
+            <div class="guideline-content" id="guidelineContent"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="metadataModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="app.hideMetadata()">✕</button>
+            <div id="metadataContent"></div>
+        </div>
+    </div>
+
+    <script>
+const guidelinesData = /*GUIDELINES_DATA*/[];
+        const categories = /*CATEGORIES_DATA*/{"categories":{},"category_order":[]};
+        const guidelineIndex = {};
+        const app = {
+            currentScreen: 'home',
+            currentCategory: null,
+            currentGuidelineIdx: null,
+
+            init() {
+                this.renderHome();
+                this.setupEventListeners();
+                window.addEventListener('popstate', (e) => {
+                    if (e.state && e.state.screen) {
+                        this.currentScreen = e.state.screen;
+                        this.currentCategory = e.state.category;
+                        this.currentGuidelineIdx = e.state.guidelineIdx;
+                        this.renderScreen();
+                    }
+                });
+            },
+
+            setupEventListeners() {
+                ['Home', 'Category', 'Guideline'].forEach(type => {
+                    const input = document.getElementById(`searchInput${type}`);
+                    const results = document.getElementById(`searchResults${type}`);
+                    input.addEventListener('input', (e) => this.handleSearch(e.target.value, results));
+                    input.addEventListener('focus', () => {
+                        if (results.children.length > 0) results.classList.add('active');
+                    });
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-container')) {
+                        document.querySelectorAll('.search-results').forEach(r => r.classList.remove('active'));
+                    }
+                });
+            },
+
+            handleSearch(query, resultsEl) {
+                resultsEl.innerHTML = '';
+                if (query.length < 2) {
+                    resultsEl.classList.remove('active');
+                    return;
+                }
+
+                const searchResults = [];
+                const lowerQuery = query.toLowerCase();
+
+                guidelinesData.forEach((guideline, idx) => {
+                    if (guideline.title.toLowerCase().includes(lowerQuery)) {
+                        searchResults.push({ type: 'guideline', guidelineIdx: idx, section: null, title: guideline.title });
+                    }
+                    guideline.sections.forEach(section => {
+                        if (section.content.toLowerCase().includes(lowerQuery)) {
+                            if (!searchResults.some(r => r.guidelineIdx === idx && r.section === section.header)) {
+                                searchResults.push({ type: 'section', guidelineIdx: idx, section: section.header, title: guideline.title });
+                            }
+                        }
+                    });
+                });
+
+                if (searchResults.length > 0) {
+                    searchResults.slice(0, 10).forEach(result => {
+                        const div = document.createElement('div');
+                        div.className = 'search-result-item';
+                        div.innerHTML = `<div class="search-result-guideline">${result.title}</div>${result.section ? `<div class="search-result-section">${result.section}</div>` : ''}`;
+                        div.addEventListener('click', () => {
+                            this.openGuideline(result.guidelineIdx);
+                            resultsEl.classList.remove('active');
+                        });
+                        resultsEl.appendChild(div);
+                    });
+                    resultsEl.classList.add('active');
+                }
+            },
+
+            renderHome() {
+                const content = document.getElementById('homeContent');
+                content.innerHTML = '';
+                Object.entries(categories).forEach(([categoryName, data]) => {
+                    const card = document.createElement('div');
+                    card.className = 'category-card';
+                    card.innerHTML = `<div class="category-emoji">${data.emoji}</div><div class="category-name">${categoryName}</div><div class="category-count">${data.guidelines.length} guidelines</div>`;
+                    card.addEventListener('click', () => this.openCategory(categoryName));
+                    content.appendChild(card);
+                });
+            },
+
+            openCategory(categoryName) {
+                this.currentScreen = 'category';
+                this.currentCategory = categoryName;
+                history.pushState({ screen: 'category', category: categoryName }, '');
+                this.renderScreen();
+            },
+
+            renderCategory() {
+                const categoryData = categories[this.currentCategory];
+                document.getElementById('categoryTitle').textContent = this.currentCategory;
+                const list = document.getElementById('guidelineList');
+                list.innerHTML = '';
+                categoryData.guidelines.forEach(guidelineName => {
+                    const idx = guidelineIndex[guidelineName];
+                    const card = document.createElement('div');
+                    card.className = 'guideline-card';
+                    card.innerHTML = `<span>${guidelineName}</span><span class="guideline-card-arrow">→</span>`;
+                    card.addEventListener('click', () => this.openGuideline(idx));
+                    list.appendChild(card);
+                });
+            },
+
+            openGuideline(guidelineIdx) {
+                this.currentScreen = 'guideline';
+                this.currentGuidelineIdx = guidelineIdx;
+                history.pushState({ screen: 'guideline', guidelineIdx: guidelineIdx }, '');
+                this.renderScreen();
+            },
+
+            renderGuideline() {
+                const guideline = guidelinesData[this.currentGuidelineIdx];
+                document.getElementById('guidelineTitle').textContent = guideline.title;
+                const content = document.getElementById('guidelineContent');
+                content.innerHTML = '';
+
+                guideline.sections.forEach((section) => {
+                    const div = document.createElement('div');
+                    div.className = 'accordion-section' + (section.header === 'Red Flags' ? ' expanded' : '');
+
+                    const colors = sectionColors[section.header] || { emoji: '📋', bg: '#dbeafe', text: '#1e3a5f' };
+
+                    const header = document.createElement('div');
+                    header.className = 'accordion-header';
+                    header.style.backgroundColor = colors.bg;
+                    header.style.color = colors.text;
+                    header.innerHTML = `<span class="accordion-header-text"><span>${colors.emoji}</span><span>${section.header}</span></span><span class="accordion-toggle">▼</span>`;
+                    header.addEventListener('click', () => div.classList.toggle('expanded'));
+
+                    const body = document.createElement('div');
+                    body.className = 'accordion-body';
+                    body.innerHTML = `<div class="accordion-body-content">${this.formatContent(section.content, guideline.title)}</div>`;
+
+                    div.appendChild(header);
+                    div.appendChild(body);
+                    content.appendChild(div);
+                });
+            },
+
+            formatContent(text, currentGuidelineTitle) {
+                if (!text) return '';
+
+                const lines = text.split('\n');
+                const result = [];
+                let i = 0;
+
+                // --- H3 heading patterns ---
+                const h3Patterns = [
+                    /^About\s/i, /^Take a history/i, /^Examine the patient/i,
+                    /^Arrange\s/i, /^Immediate assessment/i, /^Immediate management/i,
+                    /^Initial Management/i, /^Ongoing Management/i, /^Start Treatment/i,
+                    /^Classification of/i, /^Confirming/i, /^Certifying/i,
+                    /^Registering/i, /^Transferring/i, /^Medical Examiner/i,
+                    /^Hypertensive emergency/i, /^Hypertensive urgency/i,
+                    /^Malignant hypertension/i, /^Standard discharge/i,
+                    /^Isolated systolic/i, /^Body mass index/i,
+                    /^Assess fluid/i, /^Fluid management/i, /^Antibiotic/i,
+                    /^Sepsis Six/i, /^Source control/i,
+                    /^Pharmacological/i, /^Non-pharmacological/i,
+                    /^Pre-operative/i, /^Intra-operative/i, /^Post-operative/i,
+                    /^Type 1 diabetes/i, /^Type 2 diabetes/i,
+                    /^Initial treatment/i, /^Ongoing treatment/i
+                ];
+
+                // --- H4 heading patterns ---
+                const h4Patterns = [
+                    /^Risk factors$/i, /^Symptoms$/i, /^Medications$/i,
+                    /^Red flags$/i, /^Concerning features$/i,
+                    /^General surgery$/i, /^Gynaecology$/i, /^Obstetrics$/i,
+                    /^Urology$/i, /^Medical causes$/i, /^Vascular$/i,
+                    /^Ruptured abdominal/i, /^Ectopic pregnancy$/i,
+                    /^Ureteric colic$/i, /^Very ill$/i,
+                    /^Urgent dialysis$/i, /^Severe hyponatraemia/i,
+                    /^Moderate hyponatraemia/i, /^Mild hyponatraemia/i,
+                    /^Acute/i, /^Chronic/i,
+                    /^Stage [123]/i, /^Grade [1234]/i,
+                    /^First-line/i, /^Second-line/i, /^Third-line/i,
+                    /^For health professionals/i, /^For patients/i,
+                    /^References$/i, /^Information$/i,
+                    /^Emergency department/i, /^Investigations$/i,
+                    /^White coat/i, /^"White coat"/i
+                ];
+
+                // --- Bold directive patterns ---
+                const boldPatterns = /^(Exclude if:|Ask about:|Note:|Consider:|Important:|If not excluded|If suspected|If the patient|Ensure |Avoid |Check |Perform |Request |Advise |Document |Calculate |Aim to|Do not |Seek |Start |Stop |Refer |Recommend )/;
+
+                // --- Detect if a line is a likely list item ---
+                function isListItem(line, prevLine, nextLine) {
+                    if (!line || line.length > 120) return false;
+                    if (line.length < 5) return false;
+                    // Lines under a bold heading that are short
+                    if (prevLine && (prevLine.match(boldPatterns) || prevLine.endsWith(':')) && line.length < 100) return true;
+                    // Consecutive short lines (3+ in a row)
+                    if (nextLine && line.length < 80 && nextLine.length < 80 && nextLine.length > 3) return true;
+                    return false;
+                }
+
+                while (i < lines.length) {
+                    let line = lines[i].trim();
+                    if (!line) { i++; continue; }
+
+                    // Check for H3 heading
+                    if (line.length < 80 && h3Patterns.some(p => p.test(line))) {
+                        result.push(`<h3>${line}</h3>`);
+                        i++; continue;
+                    }
+
+                    // Check for H4 heading
+                    if (line.length < 80 && h4Patterns.some(p => p.test(line))) {
+                        result.push(`<h4>${line}</h4>`);
+                        i++; continue;
+                    }
+
+                    // Check for short line before longer content = heading
+                    if (line.length < 60 && line.length > 3 && !line.endsWith('.') && !line.endsWith(',')) {
+                        let nextIdx = i + 1;
+                        while (nextIdx < lines.length && !lines[nextIdx].trim()) nextIdx++;
+                        if (nextIdx < lines.length && lines[nextIdx].trim().length > 80) {
+                            result.push(`<h3>${line}</h3>`);
+                            i++; continue;
+                        }
+                    }
+
+                    // Check for bullet list (consecutive short lines)
+                    let prevLine = i > 0 ? lines[i-1].trim() : '';
+                    let nextLine = i + 1 < lines.length ? lines[i+1].trim() : '';
+                    if (line.length < 100 && line.length > 3) {
+                        // Look ahead to see if we have 2+ consecutive short lines
+                        let listLines = [];
+                        let j = i;
+                        while (j < lines.length) {
+                            let l = lines[j].trim();
+                            if (!l) { j++; continue; }
+                            if (l.length < 100 && l.length > 3 && !h3Patterns.some(p => p.test(l)) && !h4Patterns.some(p => p.test(l))) {
+                                // Don't start a list with a line that looks like a paragraph
+                                if (listLines.length === 0 && l.length > 80) break;
+                                listLines.push(l);
+                                j++;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        if (listLines.length >= 3) {
+                            result.push('<ul>');
+                            listLines.forEach(item => {
+                                item = item.replace(boldPatterns, '<strong>$1</strong>');
+                                result.push(`<li>${item}</li>`);
+                            });
+                            result.push('</ul>');
+                            i = j; continue;
+                        }
+                    }
+
+                    // Regular paragraph with bold detection
+                    line = line.replace(boldPatterns, '<strong>$1</strong>');
+                    // Also bold text ending with colon if short
+                    if (line.endsWith(':') && line.length < 60) {
+                        line = `<strong>${line}</strong>`;
+                    }
+                    result.push(`<p>${line}</p>`);
+                    i++;
+                }
+
+                // Now apply cross-links to the final HTML
+                let html = result.join('\n');
+
+                const guidelineLinks = [
+                    { title: "Sepsis in Adults", patterns: [/\bsepsis\b/gi] },
+                    { title: "Acute Hypertension", patterns: [/\bacute hypertension\b/gi] },
+                    { title: "Acute Kidney Injury", patterns: [/\bacute kidney injury\b/gi, /\bAKI\b/g] },
+                    { title: "Abdominal Pain in Adults", patterns: [/\babdominal pain\b/gi] },
+                    { title: "Inflammatory Bowel Disease (IBD)", patterns: [/\bIBD\b/g, /\binflammatory bowel disease\b/gi] },
+                    { title: "Hyponatraemia", patterns: [/\bhyponatraemia\b/gi] },
+                    { title: "Delirium", patterns: [/\bdelirium\b/gi] },
+                    { title: "Mental Capacity", patterns: [/\bmental capacity\b/gi] },
+                    { title: "Last days of life", patterns: [/\blast days of life\b/gi] }
+                ];
+
+                guidelineLinks.forEach(link => {
+                    if (link.title.toLowerCase() !== currentGuidelineTitle.toLowerCase()) {
+                        link.patterns.forEach(regex => {
+                            html = html.replace(regex, (match) => {
+                                return `<a class="cross-link" onclick="app.openGuidelineByTitle('${link.title}')">${match}</a>`;
+                            });
+                        });
+                    }
+                });
+
+                return html;
+            },
+
+            openGuidelineByTitle(title) {
+                const idx = guidelineIndex[title];
+                if (idx !== undefined) this.openGuideline(idx);
+            },
+
+            renderScreen() {
+                document.getElementById('homeScreen').classList.remove('active');
+                document.getElementById('categoryScreen').classList.remove('active');
+                document.getElementById('guidelineScreen').classList.remove('active');
+
+                if (this.currentScreen === 'home') {
+                    document.getElementById('homeScreen').classList.add('active');
+                    document.getElementById('searchInputHome').value = '';
+                } else if (this.currentScreen === 'category') {
+                    document.getElementById('categoryScreen').classList.add('active');
+                    this.renderCategory();
+                    document.getElementById('searchInputCategory').value = '';
+                } else if (this.currentScreen === 'guideline') {
+                    document.getElementById('guidelineScreen').classList.add('active');
+                    this.renderGuideline();
+                    document.getElementById('searchInputGuideline').value = '';
+                }
+
+                document.querySelectorAll('.search-results').forEach(r => r.classList.remove('active'));
+            },
+
+            goHome() {
+                this.currentScreen = 'home';
+                this.currentCategory = null;
+                this.currentGuidelineIdx = null;
+                history.pushState({ screen: 'home' }, '');
+                this.renderScreen();
+            },
+
+            goBack() {
+                if (this.currentScreen === 'guideline') {
+                    this.currentScreen = 'category';
+                    history.pushState({ screen: 'category', category: this.currentCategory }, '');
+                } else if (this.currentScreen === 'category') {
+                    this.goHome();
+                    return;
+                }
+                this.renderScreen();
+            },
+
+            showMetadata() {
+                const guideline = guidelinesData[this.currentGuidelineIdx];
+                const metadata = document.getElementById('metadataContent');
+                metadata.innerHTML = `
+                    <div class="metadata-item">
+                        <div class="metadata-label">Guideline Title</div>
+                        <div class="metadata-value">${guideline.title}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">Source File</div>
+                        <div class="metadata-value">${guideline.filename}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">Number of Sections</div>
+                        <div class="metadata-value">${guideline.sections.length}</div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">Sections</div>
+                        <div class="metadata-value">${guideline.sections.map(s => s.header).join(', ')}</div>
+                    </div>
+                `;
+                document.getElementById('metadataModal').classList.add('active');
+            },
+
+            hideMetadata() {
+                document.getElementById('metadataModal').classList.remove('active');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => app.init());
+        document.getElementById('metadataModal').addEventListener('click', (e) => {
+            if (e.target.id === 'metadataModal') app.hideMetadata();
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service worker registered'))
+                    .catch(err => console.log('Service worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

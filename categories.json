@@ -1,0 +1,40 @@
+{
+  "categories": {
+    "Acute Medicine": {
+      "emoji": "🏥",
+      "guidelines": ["Sepsis in Adults", "Acute Hypertension", "Acute Kidney Injury"]
+    },
+    "General Surgery": {
+      "emoji": "🔪",
+      "guidelines": ["Abdominal Pain in Adults"]
+    },
+    "Gastroenterology": {
+      "emoji": "🔬",
+      "guidelines": ["Inflammatory Bowel Disease (IBD)"]
+    },
+    "Metabolic & Endocrine": {
+      "emoji": "⚗️",
+      "guidelines": ["Hyponatraemia", "Perioperative management of diabetes"]
+    },
+    "Mental Health & Cognition": {
+      "emoji": "🧠",
+      "guidelines": ["Delirium", "Mental Capacity"]
+    },
+    "End of Life Care": {
+      "emoji": "🕊️",
+      "guidelines": ["Death of an adult", "Last days of life"]
+    }
+  },
+  "category_order": ["Acute Medicine", "General Surgery", "Gastroenterology", "Metabolic & Endocrine", "Mental Health & Cognition", "End of Life Care"],
+  "directorate_mapping": {
+    "Medicine": "Acute Medicine",
+    "Surgery": "General Surgery",
+    "Gastroenterology": "Gastroenterology",
+    "Metabolic": "Metabolic & Endocrine",
+    "Endocrine": "Metabolic & Endocrine",
+    "Psychiatry": "Mental Health & Cognition",
+    "Mental Health": "Mental Health & Cognition",
+    "Palliative": "End of Life Care",
+    "End of Life": "End of Life Care"
+  }
+}
