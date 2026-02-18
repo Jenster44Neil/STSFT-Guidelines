@@ -77,9 +77,34 @@
         }
 
         .header-home {
-            flex-direction: column;
-            align-items: flex-start;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
             gap: 0.5rem;
+        }
+
+        .home-button {
+            background: none;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            cursor: pointer;
+            padding: 0.4rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            gap: 0.4rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .home-button:active {
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .nhs-logo {
@@ -446,6 +471,7 @@
             <div class="header-nav">
                 <button class="back-button" onclick="app.goHome()">←</button>
                 <div class="header-title" id="categoryTitle"></div>
+                <button class="home-button" onclick="app.goHome()">🏠 Menu</button>
             </div>
         </header>
         <div class="search-container">
@@ -462,7 +488,7 @@
             <div class="header-nav">
                 <button class="back-button" onclick="app.goBack()">←</button>
                 <div class="header-title" id="guidelineTitle"></div>
-                <button class="header-info" id="infoButton" onclick="app.showMetadata()">ⓘ</button>
+                <button class="home-button" onclick="app.goHome()">🏠 Menu</button>
             </div>
         </header>
         <div class="search-container">
