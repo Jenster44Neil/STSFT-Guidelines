@@ -561,7 +561,11 @@ const guidelinesData = /*GUIDELINES_DATA*/[];
             renderHome() {
                 const content = document.getElementById('homeContent');
                 content.innerHTML = '';
-                Object.entries(categories).forEach(([categoryName, data]) => {
+                const catData = categories.categories || categories;
+                const catOrder = categories.category_order || Object.keys(catData);
+                catOrder.forEach(categoryName => {
+                    const data = catData[categoryName];
+                    if (!data) return;
                     const card = document.createElement('div');
                     card.className = 'category-card';
                     card.innerHTML = `<div class="category-emoji">${data.emoji}</div><div class="category-name">${categoryName}</div><div class="category-count">${data.guidelines.length} guidelines</div>`;
@@ -578,7 +582,8 @@ const guidelinesData = /*GUIDELINES_DATA*/[];
             },
 
             renderCategory() {
-                const categoryData = categories[this.currentCategory];
+                const catData = categories.categories || categories;
+                const categoryData = catData[this.currentCategory];
                 document.getElementById('categoryTitle').textContent = this.currentCategory;
                 const list = document.getElementById('guidelineList');
                 list.innerHTML = '';
