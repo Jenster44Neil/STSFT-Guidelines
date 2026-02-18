@@ -396,7 +396,9 @@ def process_docx_file(filepath, categories_config):
 
         # Extract metadata and title
         metadata = extract_metadata(doc)
-        title = metadata["title"] or filename.replace(".docx", "").replace(" Draft V.1", "")
+        # Prefer filename-derived title (cleaner and more consistent than metadata)
+        filename_title = filename.replace(".docx", "").replace(" Draft V.1", "").replace(" Draft v.1", "").replace(" Draft", "").strip()
+        title = filename_title if filename_title else (metadata["title"] or filename.replace(".docx", ""))
 
         # Extract sections
         sections = extract_sections(doc)
