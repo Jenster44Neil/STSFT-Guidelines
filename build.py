@@ -233,6 +233,9 @@ def format_content(text):
             return True
         return False
 
+    # Regex for numbered lines like "1.", "2.", "10." etc.
+    numbered_pattern = re.compile(r"^(\d+)\.\s+(.+)")
+
     while i < len(lines):
         line = lines[i].strip()
         if not line:
@@ -260,6 +263,7 @@ def format_content(text):
             and len(line) > 3
             and not line.endswith(".")
             and not line.endswith(",")
+            and not numbered_pattern.match(line)
         ):
             next_idx = i + 1
             while next_idx < len(lines) and not lines[next_idx].strip():
@@ -269,17 +273,51 @@ def format_content(text):
                 i += 1
                 continue
 
-        # Check for bullet list (3+ consecutive short lines)
-        if len(line) < 100 and len(line) > 3:
+        # Check for numbered line (e.g. "1. Check the previous...")
+        num_match = numbered_pattern.match(line)
+        if num_match:
+            num = num_match.group(1)
+            text_part = num_match.group(2)
+            result.append(f'<p><strong>{num}. {text_part}</strong></p>')
+            i += 1
+            # Collect any sub-items that follow (non-numbered, non-heading, non-empty lines)
+            sub_items = []
+            while i < len(lines):
+                sub = lines[i].strip()
+                if not sub:
+                    i += 1
+                    continue
+                # Stop if we hit another numbered line, a heading, or a bold directive
+                if numbered_pattern.match(sub):
+                    break
+                if matches_pattern_list(sub, h3_patterns) or matches_pattern_list(sub, h4_patterns):
+                    break
+                if re.match(bold_patterns, sub):
+                    break
+                sub_items.append(sub)
+                i += 1
+            if sub_items:
+                result.append("<ul>")
+                for item in sub_items:
+                    result.append(f"<li>{item}</li>")
+                result.append("</ul>")
+            continue
+
+        # Check for bullet list (3+ consecutive short lines, not numbered)
+        if len(line) < 100 and len(line) > 3 and not numbered_pattern.match(line):
             list_items = [line]
             j = i + 1
             while j < len(lines):
-                next = lines[j].strip()
-                if not next:
+                nxt = lines[j].strip()
+                if not nxt:
                     j += 1
                     continue
-                if len(next) < 100 and len(next) > 3 and not re.match(h3_patterns[0], next):
-                    list_items.append(next)
+                if numbered_pattern.match(nxt):
+                    break
+                if matches_pattern_list(nxt, h3_patterns) or matches_pattern_list(nxt, h4_patterns):
+                    break
+                if len(nxt) < 100 and len(nxt) > 3:
+                    list_items.append(nxt)
                     j += 1
                 else:
                     break
